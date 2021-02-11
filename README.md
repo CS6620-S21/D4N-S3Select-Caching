@@ -4,23 +4,24 @@
 
 ## 1.   Vision and Goals Of The Project:
 
-The vision section describes the final desired state of the project once the project is complete. It also specifies the key goals of the project. This section provides a context for decision-making. A shared vision among all team members can help ensuring that the solution meets the intended goals. A solid vision clarifies perspective and facilitates decision-making.
+D4N is a a multi-layer cooperative caching solution which aims to improve performance in distributed systems by implementing a smart caching algorithm, which caches data on the access side of each layer hierarchical network topology, adaptively adjusting cache sizes of each layer based on observed workload patterns and network congestion.
 
-The vision statement should be specific enough that you can look at a proposed solution and say either "yes, this meets the vision and goals", or "no, it does not".
+The goal of this project is to enhance D4N to directly support S3 Select, a new S3 feature that allows applications to select, transform, and summarize data within S3 objects using SQL query commands. This will allow the clients to read and cache only the specific parts of the objects, stored in the Ceph cluster, rather than transferring the entire object over the network. This will result in even more reduced data transfer and traffic over the network.
 
 ## 2. Users/Personas Of The Project:
 
-This section describes the principal user roles of the project together with the key characteristics of these roles. This information will inform the design and the user scenarios. A complete set of roles helps in ensuring that high-level requirements can be identified in the product backlog.
+The only users in the D4N architecture are the Clients, which are the Spark jobs running on the server racks and they read and write data from the Ceph storage clusters.
 
-Again, the description should be specific enough that you can determine whether user A, performing action B, is a member of the set of users the project is designed for.
+The D4N Caching architecture is a caching middleware between the Clients and Ceph storage. 
+<!-- The Rados Gatway(RGW) is the object storage interface of Ceph and it is responsible for the communication between the clients and  ceph.  -->
 
 ** **
 
 ## 3.   Scope and Features Of The Project:
 
-The Scope places a boundary around the solution by detailing the range of features and functions of the project. This section helps to clarify the solution scope and can explicitly state what will not be delivered as well.
-
-It should be specific enough that you can determine that e.g. feature A is in-scope, while feature B is out-of-scope.
+1. S3 Select to read part of objects from ceph.
+2. Caching the data and updating the global directory and formatting the response in arrow format.
+3. Upgrading the Spark jobs to read the response in arrow format.
 
 ** **
 
