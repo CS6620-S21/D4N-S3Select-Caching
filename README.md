@@ -22,22 +22,24 @@ The D4N Caching architecture is a caching middleware between the Clients and Cep
 1. S3 Select to read part of objects from ceph.
 2. Caching the data and updating the global directory and formatting the response in arrow format.
 3. Upgrading the Spark jobs to read the response in arrow format.
+4. Find or create client workloads that generate s3 select request traffic, and can measure throughput and latency of same
+5. Design and implement a prototype s3 select cache strategy or strategies within D4N with guidance from mentors
+6. Evaluate the result of the s3 select cache
 
 ** **
 
 ## 4. Solution Concept
+<!-- Some technical descp about D4N -->
+1. Ceph 
+2. RGW
+3. S3 
+4. S3 Select
+5. Apache Arrow
+7. Global directory (REDIS)
+<!-- 6. Read Cache -->
+8. Compute Nodes/Spark jobs
 
-This section provides a high-level outline of the solution.
-
-Global Architectural Structure Of the Project:
-
-This section provides a high-level architecture or a conceptual diagram showing the scope of the solution. If wireframes or visuals have already been done, this section could also be used to show how the intended solution will look. This section also provides a walkthrough explanation of the architectural structure.
-
- 
-
-Design Implications and Discussion:
-
-This section discusses the implications and reasons of the design decisions made during the global architecture design.
+<!-- System archictecture Diagram -->
 
 ## 5. Acceptance criteria
 
