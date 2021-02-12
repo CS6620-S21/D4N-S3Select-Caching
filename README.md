@@ -29,9 +29,10 @@ The D4N Caching architecture is a caching middleware between the Clients and Cep
 ** **
 
 ## 4. Solution Concept
+<!-- System archictecture Diagram -->
 <!-- Some technical descp about D4N -->
 1. Ceph 
-2. RGW
+2. RGW 
 3. S3 
 4. S3 Select
 5. Apache Arrow
@@ -39,7 +40,6 @@ The D4N Caching architecture is a caching middleware between the Clients and Cep
 <!-- 6. Read Cache -->
 8. Compute Nodes/Spark jobs
 
-<!-- System archictecture Diagram -->
 
 ## 5. Acceptance criteria
 
