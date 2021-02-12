@@ -29,6 +29,7 @@ The D4N Caching architecture is a caching middleware between the Clients and Cep
 
 ## 4. Solution Concept
 <!-- Some technical descp about D4N -->
+<!-- System archictecture Diagram -->
 1. Ceph 
 2. RGW
 3. S3 
@@ -37,8 +38,8 @@ The D4N Caching architecture is a caching middleware between the Clients and Cep
 7. Global directory (REDIS)
 <!-- 6. Read Cache -->
 8. Compute Nodes/Spark jobs
+9. Spark 
 
-<!-- System archictecture Diagram -->
 
 ## 5. Acceptance criteria
 
@@ -46,7 +47,21 @@ This section discusses the minimum acceptance criteria at the end of the project
 
 ## 6.  Release Planning:
 
-Release planning section describes how the project will deliver incremental sets of features and functions in a series of releases to completion. Identification of user stories associated with iterations that will ease/guide sprint planning sessions is encouraged. Higher level details for the first iteration is expected.
+In 2 weeks - setup D4N and S3 Select and do some basic changes, setup Ceph and Arrow, build Spark.
+
+Week 1 - Build and run master Ceph, build and run spark S3 select query against Ceph
+
+Week 2 - D4N codewalk and S3 Select codewalk and understand S3 select workflow on Spark side and understand Arrow workflow with Ceph 
+
+Week 3,4,5,6 - Implementation 
+
+Week 7,8 - Testing, performance evaluation
+
+Week 8,9 - Documentation
+
+
+
+
 
 ** **
 
