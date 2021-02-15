@@ -65,17 +65,24 @@ We aim to complete the implementation of S3 Select in the D4N Caching mechanism,
 
 ## 6.  Release Planning:
 
-In 2 weeks - setup D4N and S3 Select and do some basic changes, setup Ceph and Arrow, build Spark.
+Detailed user stories, plan and backlog will be via Tiaga 
 
-Week 1 - Build and run master Ceph, build and run spark S3 select query against Ceph
+Week 1 & 2  
+			- Set up Ceph and Spark; have D4N and S3 Select run basic queries 
 
-Week 2 - D4N codewalk and S3 Select codewalk and understand S3 select workflow on Spark side and understand Arrow workflow with Ceph 
+			    Individual Tasks 
+								- Build and run master Ceph
+								- Build S3 Select with Spark, run against Ceph 
+		   						- D4N and S3 Select codewalk; understand workflow for S3 Select on Spark and Arrow with Ceph 
 
-Week 3,4,5,6 - Implementation 
+Week 3,4,5,6 
+			- Implementation 
 
-Week 7,8 - Testing, performance evaluation
+Week 7 & 8 
+			- Testing and Performance evaluation
 
-Week 8,9 - Documentation
+Week 8 & 9 
+			- Documentation
 
 
 
