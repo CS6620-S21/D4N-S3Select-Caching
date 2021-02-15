@@ -21,7 +21,7 @@ The D4N Caching architecture is a caching middleware between the Clients and Cep
 
 1. Create client workloads that generate s3 select request traffic, and can measure throughput and latency of same.
 2. Design and implement a prototype S3 select cache strategy or strategies within D4N; S3 Select to read subset of object from ceph.
-3. Cache data and update the global directory, return formatted response in arrow. Hence, evaluating the result of the s3 select cache
+3. Cache data and update the global directory, return formatted response in Arrow. Hence, evaluating the result of the s3 select cache
 4. Update the Spark jobs to read the response in arrow format.
  
 
@@ -31,7 +31,8 @@ The D4N Caching architecture is a caching middleware between the Clients and Cep
 <!-- Some technical descp about D4N -->
 <!-- System archictecture Diagram -->
 ![System architecture]( D4N%20Block%20Diagram.png "D4N Architecture")
-1. Ceph 
+1. <b>Ceph</b> - Ceph is a distributed storage platform implemented as an object storage. It is highly scalable and distributed system running on a compute cluster. It stripes and distributes the file across multiple nodes for high throughput and fault-tolerance. It supports Object, Block, and File System storage by providing different layers over object storage, and a single interface to all the three storage types. It supports these functionalities using various daemons (cluster monitors, object storage devices, http gateways, etc.) running on top of each node.
+
 2. RGW
 3. <b>S3</b> - S3 is a protocol that is used to store and retrieve any amount of data, on the web. Here S3 is being used to access the Ceph storage clusters using boto3 library.
 
