@@ -24,7 +24,6 @@ The D4N Caching architecture is a caching middleware between the Clients and Cep
 3. Cache data and update the global directory, return formatted response in Arrow. Hence, evaluating the result of the s3 select cache
 4. Update the Spark jobs to read the response in arrow format.
  
-
 ** **
 
 ## 4. Solution Concept
@@ -33,7 +32,8 @@ The D4N Caching architecture is a caching middleware between the Clients and Cep
 ![System architecture]( D4N%20Block%20Diagram.png "D4N Architecture")
 1. <b>Ceph</b> - Ceph is a distributed storage platform implemented as an object storage. It is highly scalable and distributed system running on a compute cluster. It stripes and distributes the file across multiple nodes for high throughput and fault-tolerance. It supports Object, Block, and File System storage by providing different layers over object storage, and a single interface to all the three storage types. It supports these functionalities using various daemons (cluster monitors, object storage devices, http gateways, etc.) running on top of each node.
 
-2. RGW
+2. RGW -
+
 3. <b>S3</b> - S3 is a protocol that is used to store and retrieve any amount of data, on the web. Here S3 is being used to access the Ceph storage clusters using boto3 library.
 
 4. <b>S3 Select</b> - S3 Select is a service that allows running simple queries on top of S3 Objects. This allows users to retrieve selective data from objects, as per the specified query, rather than fetching the entire object, thus saving network bandwith, processing time and resources.
@@ -44,7 +44,7 @@ In the current implementation of D4N, the client reads and caches the entire fil
 7. <b>Global directory (REDIS)</b> - 
 Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache, and message broker. In contect of D4N, Redis is being used a Global directory to index that data stored in the distributed cache.
 <!-- 6. Read Cache -->
-8. Compute Nodes/Spark jobs
+8. <b>Compute Nodes/Clients</b> - The compute nodes are the spark jobs that run on the cluster. They are the users of the D4N caching mechanism and they request data from the Ceph storage. However, they do not directly communicate with the Ceph storage, they do that through the Rados gatway(RGW). Part of this project, also focuses on enhancing the clients to accept the results of S3 select, from the cache, in Arrow format.
 9. Spark 
 
 <!-- -->
@@ -55,6 +55,7 @@ To accomplish our overall goal, we will break it into these subtasks:
 4. Cache the results in D4N from remote Ceph cluster
 5. Lookup in the cache before forwarding the request to the remote Ceph cluster
 6. Retrieve the data found in D4N or generate a request to the remote Ceph
+
 ## 5. Acceptance criteria
 
 We aim to complete the implementation of S3 Select in the D4N Caching mechanism, which is minimum acceptance criteria for the project. The product which satisfies the minumum acceptance criteria will support the following operations -
