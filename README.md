@@ -30,12 +30,18 @@ The D4N Caching architecture is a caching middleware between the Clients and Cep
 ## 4. Solution Concept
 <!-- Some technical descp about D4N -->
 <!-- System archictecture Diagram -->
+![System architecture]( D4N%20Block%20Diagram.png "D4N Architecture")
 1. Ceph 
 2. RGW
-3. S3 
-4. S3 Select
-5. Apache Arrow
-7. Global directory (REDIS)
+3. <b>S3</b> - S3 is a protocol that is used to store and retrieve any amount of data, on the web. Here S3 is being used to access the Ceph storage clusters using boto3 library.
+
+4. <b>S3 Select</b> - S3 Select is a service that allows running simple queries on top of S3 Objects. This allows users to retrive selective data from objects, as per the specified query, rather than fetching the entire object, saving network bandwith, processing time and resources.
+In the current implementation of D4N, the client reads and caches the entire files from the storage, even they it only need some part of the data, we want to make this more efficient. Hence S3 select is an important part of this project, as the goal is to enable the clients to use S3 select to retrive and cache the data in D3N,resulting in reduced network data transfer, and efficient use of cache memory. 
+
+5. <b>Apache Arrow</b> - Apache Arrow is a software development platform for building high performance applications that process and transport large data sets. It is designed to both improve the performance of analytical algorithms and the efficiency of moving data from one system or programming language to another. We aim to use Arrow as the format for communication from the cache to the clients, to make the trasnfer of cached data more efficient.
+
+7. <b>Global directory (REDIS)</b> - 
+Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache, and message broker. In contect of D4N, Redis is being used a Global directory to index that data stored in the distributed cache.
 <!-- 6. Read Cache -->
 8. Compute Nodes/Spark jobs
 9. Spark 
@@ -43,7 +49,11 @@ The D4N Caching architecture is a caching middleware between the Clients and Cep
 
 ## 5. Acceptance criteria
 
-This section discusses the minimum acceptance criteria at the end of the project and stretch goals.
+We aim to complete the implementation of S3 Select in the D4N Caching mechanism, which is minimum acceptance criteria for the project. The product which satisfies the minumum acceptance criteria will support the following operations -
+
+1. The Rados gateway(RGW) will be able to accept S3 select requests.
+2. The RGW will be able to run the queries on the Ceph storage cluster and retrive the results.
+3. The results of S3 select queries will be cached in the distributed cache and indexed in the global directory.
 
 ## 6.  Release Planning:
 
