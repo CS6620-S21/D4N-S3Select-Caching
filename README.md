@@ -36,10 +36,10 @@ The D4N Caching architecture is a caching middleware between the Clients and Cep
 2. RGW
 3. <b>S3</b> - S3 is a protocol that is used to store and retrieve any amount of data, on the web. Here S3 is being used to access the Ceph storage clusters using boto3 library.
 
-4. <b>S3 Select</b> - S3 Select is a service that allows running simple queries on top of S3 Objects. This allows users to retrive selective data from objects, as per the specified query, rather than fetching the entire object, saving network bandwith, processing time and resources.
-In the current implementation of D4N, the client reads and caches the entire files from the storage, even they it only need some part of the data, we want to make this more efficient. Hence S3 select is an important part of this project, as the goal is to enable the clients to use S3 select to retrive and cache the data in D3N,resulting in reduced network data transfer, and efficient use of cache memory. 
+4. <b>S3 Select</b> - S3 Select is a service that allows running simple queries on top of S3 Objects. This allows users to retrieve selective data from objects, as per the specified query, rather than fetching the entire object, thus saving network bandwith, processing time and resources.
+In the current implementation of D4N, the client reads and caches the entire files from the storage although a subset of the object might be required.  With S3 Select, the goal is to enable the clients to retrieve and cache the data in D4N,resulting in reduced network data transfer, and efficient use of cache memory. 
 
-5. <b>Apache Arrow</b> - Apache Arrow is a software development platform for building high performance applications that process and transport large data sets. It is designed to both improve the performance of analytical algorithms and the efficiency of moving data from one system or programming language to another. We aim to use Arrow as the format for communication from the cache to the clients, to make the trasnfer of cached data more efficient.
+5. <b>Apache Arrow</b> - Apache Arrow is a software development platform for building high performance applications that process and transport large data sets. It is designed to both improve the performance of analytical algorithms and the efficiency of moving data from one system or programming language to another. We aim to use Arrow as the format for communication from the cache to the clients, to make the transfer of cached data more efficient.
 
 7. <b>Global directory (REDIS)</b> - 
 Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache, and message broker. In contect of D4N, Redis is being used a Global directory to index that data stored in the distributed cache.
@@ -68,12 +68,11 @@ We aim to complete the implementation of S3 Select in the D4N Caching mechanism,
 Detailed user stories, plan and backlog will be via Tiaga 
 
 Week 1 & 2  
-			- Set up Ceph and Spark; have D4N and S3 Select run basic queries 
-
-			    Individual Tasks 
-								- Build and run master Ceph
-								- Build S3 Select with Spark, run against Ceph 
-		   						- D4N and S3 Select codewalk; understand workflow for S3 Select on Spark and Arrow with Ceph 
+			- Set up Ceph and Spark; have D4N with S3 Select run basic queries 
+              Individual Tasks 
+								1. Build and run master Ceph
+								2. Build Spark with S3 Select
+		   						3. D4N and S3 Select codewalk; understand workflow for S3 Select on Spark and Arrow with Ceph 
 
 Week 3,4,5,6 
 			- Implementation 
