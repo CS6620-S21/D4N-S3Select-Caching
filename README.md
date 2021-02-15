@@ -47,7 +47,14 @@ Redis is an open source (BSD licensed), in-memory data structure store, used as 
 8. Compute Nodes/Spark jobs
 9. Spark 
 
-
+<!-- -->
+To accomplish our overall goal, we will break it into these subtasks:
+1. Modify Spark to make it request S3 Select queries 
+2. Make Spark request and understand the Arrow file format
+3. Combine S3 Select with D4N
+4. Cache the results in D4N from remote Ceph cluster
+5. Lookup in the cache before forwarding the request to the remote Ceph cluster
+6. Retrieve the data found in D4N or generate a request to the remote Ceph
 ## 5. Acceptance criteria
 
 We aim to complete the implementation of S3 Select in the D4N Caching mechanism, which is minimum acceptance criteria for the project. The product which satisfies the minumum acceptance criteria will support the following operations -
