@@ -30,6 +30,7 @@ The D4N Caching architecture is a caching middleware between the Clients and Cep
 ## 4. Solution Concept
 <!-- Some technical descp about D4N -->
 <!-- System archictecture Diagram -->
+![System architecture]( D4N%20Block%20Diagram.png "D4N Architecture")
 1. Ceph 
 2. RGW
 3. <b>S3</b> - S3 is a protocol that is used to store and retrieve any amount of data, on the web. Here S3 is being used to access the Ceph storage clusters using boto3 library.
