@@ -37,12 +37,15 @@ The D4N Caching architecture is a caching middleware between the Clients and Cep
 ### D4N Caching:
 
 ![D4N architecture](D4N_Architecture.png "D4N Architecture")
-<i>Figure 1: This diagram describes the architecture of D4N </i>
+<i>Figure 1: This diagram describes the current architecture of D4N </i>
 
 This project is focused around D4N. D4N is a datacenter-scale data delivery network. D4N's main goal is to reduce the network congestion and increase the throughput of fetching data from Data Lakes by using a cooperative caching on the access side of the network link. D4N is implemented on top of Ceph object storage system by modifying RGW service (Rados Gateway). RGW acts as an interface between S3 and Swift protocols, and the backend Object store of the Ceph cluster. Clients directs all the data requests to RGW using S3 or Swift protocol. If the cache does not contain the requested data, the request is directed to the backend storage system. Now the retrieved data is stored locally on the rack, and next request for the same data will be serviced quickly. D4N implements caching using three components:
 1. Cache servers - Client requests are directed to them for servicing
 2. Lookup service - Clients use this to find their nearest cache
 3. Heartbeat service - Lookup service uses this to keep track of all the active caches
+
+![System architecture]( D4N%20Block%20Diagram.png "Overall system architecture")
+<i>Figure 3: This diagram describes the system architecture after adding the deliverables of this project</i>
 
 <div style="text-align: justify">
 Here we briefly describe all other technologies used in the project:
@@ -71,15 +74,6 @@ Redis is an open source (BSD licensed), in-memory data structure store, used as 
 Part of this project involves modifying Spark's System to request S3 Select queries where S3 Select allows applications to retrieve only a subset of data from an object.  
 </div>
 
-
-
-<!-- System archictecture Diagram -->
-
-
-<!-- System archictecture Diagram -->
-
-![System architecture]( D4N%20Block%20Diagram.png "Overall system architecture")
-<i>Figure 3: This diagram describes the overall system architecture</i>
 
 To accomplish our overall goal, we will break it into these subtasks:
 1. Modify Spark to make it request S3 Select queries - Apache jobs(a) are inturn modified to place query requests of S3 Select to the remote Ceph cluster. This also offers better resource utilisation of Spark jobs and significant improvement in perfomance.
