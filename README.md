@@ -1,6 +1,15 @@
-# D4N-S3Select-Caching
+<h1>D4N-S3Select-Caching
+</h1>
 
 ** **
+
+- [1.   Vision and Goals Of The Project:](#1---vision-and-goals-of-the-project-)
+- [2. Users/Personas Of The Project:](#2-users-personas-of-the-project-)
+- [3.   Scope and Features Of The Project:](#3---scope-and-features-of-the-project-)
+- [4. Solution Concept](#4-solution-concept)
+- [5. Acceptance criteria](#5-acceptance-criteria)
+- [6.  Release Planning:](#6--release-planning-)
+
 
 ## 1.   Vision and Goals Of The Project:
 
@@ -37,7 +46,8 @@ The D4N Caching architecture is a caching middleware between the Clients and Cep
 
 3. <b>S3</b> - S3 is a protocol that is used to store and retrieve any amount of data, on the web. Here S3 is being used to access the Ceph storage clusters using boto3 library.
 
-4. <b>S3 Select</b> - S3 Select is a service that allows running simple queries on top of S3 Objects. This allows users to retrieve selective data from objects, as per the specified query, rather than fetching the entire object, thus saving network bandwith, processing time and resources.
+4. <b>S3 Select</b> - S3 Select is a service that allows running simple queries on top of S3 Objects. This allows users to retrieve selective data from objects, as per the specified query, rather than fetching the entire object, thus saving network bandwith, processing time and resources. S3 Select also enables for higher level analytic-applications such as SPARK-SQL, using the "selection of a restricted subset" feature to improve their latency and throughput
+
 In the current implementation of D4N, the client reads and caches the entire files from the storage although a subset of the object might be required.  With S3 Select, the goal is to enable the clients to retrieve and cache the data in D4N,resulting in reduced network data transfer, and efficient use of cache memory. 
 
 5. <b>Apache Arrow</b> - Apache Arrow is a software development platform for building high performance applications that process and transport large data sets. It is designed to both improve the performance of analytical algorithms and the efficiency of moving data from one system or programming language to another. We aim to use Arrow as the format for communication from the cache to the clients, to make the transfer of cached data more efficient.
