@@ -3,11 +3,13 @@
 
 ** **
 
-**Table of Contents**
+- [1.   Vision and Goals Of The Project:](#1---vision-and-goals-of-the-project-)
+- [2. Users/Personas Of The Project:](#2-users-personas-of-the-project-)
+- [3.   Scope and Features Of The Project:](#3---scope-and-features-of-the-project-)
+- [4. Solution Concept](#4-solution-concept)
+- [5. Acceptance criteria](#5-acceptance-criteria)
+- [6.  Release Planning:](#6--release-planning-)
 
-[TOCM]
-
-[TOC]
 
 ## 1.   Vision and Goals Of The Project:
 
@@ -117,7 +119,6 @@ https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
 In particular, you can add images like this (clone the repository to see details):
 
 ![alt text](https://github.com/BU-NU-CLOUD-SP18/sample-project/raw/master/cloud.png "Hover text")
-
 
 
 
