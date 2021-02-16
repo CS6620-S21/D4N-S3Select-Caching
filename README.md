@@ -34,7 +34,6 @@ The D4N Caching architecture is a caching middleware between the Clients and Cep
 
 ## 4. Solution Concept
 <!-- Some technical descp about D4N -->
-<div style="text-align: justify">
 ### D4N Caching:
 
 ![D4N architecture](D4N_Architecture.png "D4N Architecture")
@@ -45,6 +44,7 @@ This project is focused around D4N. D4N is a datacenter-scale data delivery netw
 2. Lookup service - Clients use this to find their nearest cache
 3. Heartbeat service - Lookup service uses this to keep track of all the active caches
 
+<div style="text-align: justify">
 Here we briefly describe all other technologies used in the project:
 
 1. <b>Ceph</b> - Ceph is a distributed storage platform implemented as an object storage. It is highly scalable and distributed system running on a compute cluster. It stripes and distributes the file across multiple nodes for high throughput and fault-tolerance. It supports Object, Block, and File System storage by providing different layers over object storage, and a single interface to all the three storage types. It supports these functionalities using various daemons (cluster monitors, object storage devices, http gateways, etc.) running on top of each node.
