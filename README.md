@@ -51,8 +51,12 @@ Redis is an open source (BSD licensed), in-memory data structure store, used as 
 9. <b> Spark </b> -  Apache Spark is an open-source, distributed processing system for big data workload. Spark utilizes in-memory caching, and optimized query execution for fast analytic queries against data of any size. Spark will enable code resuage across multiple workloads—batch processing and interactive queries.
 Part of this project involves modifying Spark's System to request S3 Select queries where S3 Select allows applications to retrieve only a subset of data from an object.  
 </div>
+
+
+
 <!-- System archictecture Diagram -->
-![System architecture]( Spark%20S3%20Select%20Pipeline.png "Spark - S3 Select Pipeline")
+
+![System architecture](Spark%20S3%20Select%20Pipeline.png "Spark - S3 Select Pipeline")
 
 
 <!-- -->
