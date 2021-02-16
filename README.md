@@ -45,7 +45,12 @@ In the current implementation of D4N, the client reads and caches the entire fil
 Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache, and message broker. In contect of D4N, Redis is being used a Global directory to index that data stored in the distributed cache.
 <!-- 6. Read Cache -->
 8. <b>Compute Nodes/Clients</b> - The compute nodes are the spark jobs that run on the cluster. They are the users of the D4N caching mechanism and they request data from the Ceph storage. However, they do not directly communicate with the Ceph storage, they do that through the Rados gatway(RGW). Part of this project, also focuses on enhancing the clients to accept the results of S3 select, from the cache, in Arrow format.
-9. Spark 
+9. <b> Spark </b> -  Apache Spark is an open-source, distributed processing system for big data workload. Spark utilizes in-memory caching, and optimized query execution for fast analytic queries against data of any size. Spark will enable code resuage across multiple workloads—batch processing and interactive queries.
+Part of this project involves modifying Spark's System to request S3 Select queries where S3 Select allows applications to retrieve only a subset of data from an object.  
+
+<!-- System archictecture Diagram -->
+![System architecture]( Spark%20S3%20Select%20Pipeline.png "Spark - S3 Select Pipeline")
+
 
 <!-- -->
 To accomplish our overall goal, we will break it into these subtasks:
