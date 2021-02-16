@@ -129,12 +129,4 @@ Week  (4/9 - 4/19)
 ** **
 
 
-For more help on markdown, see
-https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
-
-In particular, you can add images like this (clone the repository to see details):
-
-![alt text](https://github.com/BU-NU-CLOUD-SP18/sample-project/raw/master/cloud.png "Hover text")
-
-
 
