@@ -28,8 +28,6 @@ The D4N Caching architecture is a caching middleware between the Clients and Cep
 
 ## 4. Solution Concept
 <!-- Some technical descp about D4N -->
-<!-- System archictecture Diagram -->
-![System architecture]( D4N%20Block%20Diagram.png "D4N Architecture")
 
 <div style="text-align: justify">
 
@@ -59,14 +57,23 @@ Part of this project involves modifying Spark's System to request S3 Select quer
 ![System architecture](Spark%20S3%20Select%20Pipeline.png "Spark - S3 Select Pipeline")
 
 
+<!-- System archictecture Diagram -->
+
+![System architecture]( D4N%20Block%20Diagram.png "D4N Architecture")
+
 <!-- -->
 To accomplish our overall goal, we will break it into these subtasks:
-1. Modify Spark to make it request S3 Select queries 
-2. Make Spark request and understand the Arrow file format
-3. Combine S3 Select with D4N
-4. Cache the results in D4N from remote Ceph cluster
-5. Lookup in the cache before forwarding the request to the remote Ceph cluster
-6. Retrieve the data found in D4N or generate a request to the remote Ceph
+1. Modify Spark to make it request S3 Select queries - Apache jobs(a) are inturn modified to place query requests of S3 Select to the remote Ceph cluster. This also offers better resource utilisation of Spark jobs and significant improvement in perfomance.
+
+2. Make Spark request and understand the Arrow file format - Queried results from computation would be returned from D4N Cache or the Remote Ceph Storage Cluster, in Arrow format(b) for efficient shipment of columnar data. In current implementation, Spark jobs support CSV format of data. 
+
+3. Combine S3 Select with D4N - D4N(c) to be merged with S3 to have S3 compatible object storage. S3 API extended with Select queries is now understood by the D4N. 
+
+4. Cache the results in D4N from remote Ceph cluster - Queried results(d) from the Remote Ceph Storage Cluster is returned to Spark jobs and cached in the 2 layer cache in D4N for future use. 
+
+5. Lookup in the cache before forwarding the request to the remote Ceph cluster - The S3 Select requests by Spark jobs for retreiving objects would be first checked in D4N (in the second layer, as contents from all cache servers would be pooled here) before requesting the Remote Ceph Storage Cluster. The presence of D4N helps accelerate workloads with strong locality and limited network connectivity between compute clusters and data storage.
+
+6. Retrieve the data found in D4N or generate a request to the remote Ceph - The subset of object queried if found, is returned in Arrow format from the Object storage cache. If not, a new request(e) is placed to the Remote Ceph storage cluster via the object interface, RGW(RADOS Gateway).  
 
 ## 5. Acceptance criteria
 
