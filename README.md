@@ -37,7 +37,7 @@ The D4N Caching architecture is a caching middleware between the Clients and Cep
 ### D4N Caching:
 
 ![D4N architecture](D4N_Architecture.png "D4N Architecture")
-<i>Figure 1: This diagram describes the current architecture of D4N </i>
+<i>Figure 1: Architecture of D4N </i>
 
 This project is focused around D4N. D4N is a datacenter-scale data delivery network. D4N's main goal is to reduce the network congestion and increase the throughput of fetching data from Data Lakes by using a cooperative caching on the access side of the network link. D4N is implemented on top of Ceph object storage system by modifying RGW service (Rados Gateway). RGW acts as an interface between S3 and Swift protocols, and the backend Object store of the Ceph cluster. Clients directs all the data requests to RGW using S3 or Swift protocol. If the cache does not contain the requested data, the request is directed to the backend storage system. Now the retrieved data is stored locally on the rack, and next request for the same data will be serviced quickly. D4N implements caching using three components:
 1. Cache servers - Client requests are directed to them for servicing
@@ -45,7 +45,7 @@ This project is focused around D4N. D4N is a datacenter-scale data delivery netw
 3. Heartbeat service - Lookup service uses this to keep track of all the active caches
 
 ![System architecture]( D4N%20Block%20Diagram.png "Overall system architecture")
-<i>Figure 3: This diagram describes the system architecture after adding the deliverables of this project</i>
+<i>Figure 2: The system architecture after adding the deliverables of this project</i>
 
 <div style="text-align: justify">
 Here we briefly describe all other technologies used in the project:
@@ -68,7 +68,7 @@ Redis is an open source (BSD licensed), in-memory data structure store, used as 
 8. <b>Compute Nodes/Clients</b> - The compute nodes are the spark jobs that run on the cluster. They are the users of the D4N caching mechanism and they request data from the Ceph storage. However, they do not directly communicate with the Ceph storage, they do that through the Rados gatway(RGW). Part of this project, also focuses on enhancing the clients to accept the results of S3 select, from the cache, in Arrow format.
 
 ![System architecture](Spark%20S3%20Select%20Pipeline.png "Spark - S3 Select Pipeline")
-<i>Figure 2: This diagram describes the Spark architecture</i>
+<i>Figure 3: Spark Architecture</i>
 
 9. <b> Spark </b> -  Apache Spark is an open-source, distributed processing system for big data workload. Spark utilizes in-memory caching, and optimized query execution for fast analytic queries against data of any size. Spark will enable code resuage across multiple workloads—batch processing and interactive queries.
 Part of this project involves modifying Spark's System to request S3 Select queries where S3 Select allows applications to retrieve only a subset of data from an object.  
