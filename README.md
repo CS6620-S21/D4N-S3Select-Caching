@@ -34,8 +34,19 @@ The D4N Caching architecture is a caching middleware between the Clients and Cep
 
 ## 4. Solution Concept
 <!-- Some technical descp about D4N -->
-
 <div style="text-align: justify">
+<b> D4N Caching: </b>
+
+<!-- System archictecture Diagram -->
+
+![D4N architecture](D4N_Architecture.png"D4N Architecture")
+
+This project is focused around D4N, which is a datacenter-scale data delivery network. D4N's main goal is to reduce the network congestion and increase the throughput of fetching data from the data lakes by using a cooperative caching on the access side of the network link. D4N is implemented on top of Ceph object storage system by modifying RGW service (Rados Gateway). RGW acts as an interface between S3 and Swift protocols, and the backend Object store of the Ceph cluster. Client directs all the data requests to RGW using S3 or Swift protocol. If the cache does not contain the requested data, the request is directed to the backend storage system. Now the retrieved data is stored locally on the rack, and next request for the same data will be serviced quickly. D4N implements caching using three components:
+1. Cache servers - Client requests are directed to them for servicing
+2. Lookup service - Clients use this to find their nearest cache
+3. Heartbeat service - Lookup service uses this to keep track of all the active caches
+
+We briefly describe all other components and technologies used in the project:
 
 1. <b>Ceph</b> - Ceph is a distributed storage platform implemented as an object storage. It is highly scalable and distributed system running on a compute cluster. It stripes and distributes the file across multiple nodes for high throughput and fault-tolerance. It supports Object, Block, and File System storage by providing different layers over object storage, and a single interface to all the three storage types. It supports these functionalities using various daemons (cluster monitors, object storage devices, http gateways, etc.) running on top of each node.
 
@@ -67,7 +78,7 @@ Part of this project involves modifying Spark's System to request S3 Select quer
 
 <!-- System archictecture Diagram -->
 
-![System architecture]( D4N%20Block%20Diagram.png "D4N Architecture")
+![System architecture]( D4N%20Block%20Diagram.png "Overall system architecture")
 
 <!-- -->
 To accomplish our overall goal, we will break it into these subtasks:
