@@ -3,17 +3,17 @@
 
 ** **
 
-- [1.   Vision and Goals Of The Project:](#1---vision-and-goals-of-the-project-)
-- [2. Users/Personas Of The Project:](#2-users-personas-of-the-project-)
-- [3.   Scope and Features Of The Project:](#3---scope-and-features-of-the-project-)
+- [1. Vision and Goals Of The Project:](#1-vision-and-goals-of-the-project)
+- [2. Users/Personas Of The Project:](#2-users-personas-of-the-project)
+- [3. Scope and Features Of The Project:](#3-scope-and-features-of-the-project)
 - [4. Solution Concept](#4-solution-concept)
 - [5. Acceptance criteria](#5-acceptance-criteria)
-- [6.  Release Planning:](#6--release-planning-)
+- [6. Release Planning:](#6-release-planning)
 
 
 ## 1.   Vision and Goals Of The Project:
 
-D4N is a a multi-layer cooperative caching solution which aims to improve performance in distributed systems by implementing a smart caching algorithm, which caches data on the access side of each layer hierarchical network topology, adaptively adjusting cache sizes of each layer based on observed workload patterns and network congestion.
+D4N is a multi-layer cooperative caching solution which aims to improve performance in distributed systems by implementing a smart caching algorithm, which caches data on the access side of each layer hierarchical network topology, adaptively adjusting cache sizes of each layer based on observed workload patterns and network congestion.
 
 The goal of this project is to enhance D4N to directly support S3 Select, a new S3 feature that allows applications to select, transform, and summarize data within S3 objects using SQL query commands. This will allow the clients to read and cache only a subset of object, stored in the Ceph cluster, rather than retrieving the entire object over the network, eventually reducing the traffic of data over the network.
 
@@ -24,16 +24,13 @@ The only users in the D4N architecture are the Clients, which are the Spark jobs
 The D4N Caching architecture is a caching middleware between the Clients and Ceph storage. 
 <!-- The Rados Gatway(RGW) is the object storage interface of Ceph and it is responsible for the communication between the clients and  ceph.  -->
 
-** **
-
 ## 3.   Scope and Features Of The Project:
 
-1. Create client workloads that generate s3 select request traffic, and can measure throughput and latency of same.
-2. Design and implement a prototype S3 select cache strategy or strategies within D4N; S3 Select to read subset of object from ceph.
-3. Cache data and update the global directory, return formatted response in Arrow. Hence, evaluating the result of the s3 select cache
+1. Create client workloads that generate S3 Select request traffic, and can measure throughput and latency of same.
+2. Design and implement a prototype S3 select cache strategy or strategies within D4N; S3 Select to read subset of object from Ceph.
+3. Cache data and update the global directory, return formatted response in Arrow. Hence, evaluating the result of the S3 Select cache
 4. Update the Spark jobs to read the response in arrow format.
- 
-** **
+
 
 ## 4. Solution Concept
 <!-- Some technical descp about D4N -->
@@ -42,7 +39,7 @@ The D4N Caching architecture is a caching middleware between the Clients and Cep
 
 1. <b>Ceph</b> - Ceph is a distributed storage platform implemented as an object storage. It is highly scalable and distributed system running on a compute cluster. It stripes and distributes the file across multiple nodes for high throughput and fault-tolerance. It supports Object, Block, and File System storage by providing different layers over object storage, and a single interface to all the three storage types. It supports these functionalities using various daemons (cluster monitors, object storage devices, http gateways, etc.) running on top of each node.
 
-2. <b> RGW </b> -
+2. <b> RGW </b> - RGW is a Ceph component that provides object storage functionality with an interface that is compatible with S3 Restful API. 
 
 3. <b>S3</b> - S3 is a protocol that is used to store and retrieve any amount of data, on the web. Here S3 is being used to access the Ceph storage clusters using boto3 library.
 
@@ -56,6 +53,7 @@ In the current implementation of D4N, the client reads and caches the entire fil
 Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache, and message broker. In contect of D4N, Redis is being used a Global directory to index that data stored in the distributed cache.
 <!-- 6. Read Cache -->
 8. <b>Compute Nodes/Clients</b> - The compute nodes are the spark jobs that run on the cluster. They are the users of the D4N caching mechanism and they request data from the Ceph storage. However, they do not directly communicate with the Ceph storage, they do that through the Rados gatway(RGW). Part of this project, also focuses on enhancing the clients to accept the results of S3 select, from the cache, in Arrow format.
+
 9. <b> Spark </b> -  Apache Spark is an open-source, distributed processing system for big data workload. Spark utilizes in-memory caching, and optimized query execution for fast analytic queries against data of any size. Spark will enable code resuage across multiple workloads—batch processing and interactive queries.
 Part of this project involves modifying Spark's System to request S3 Select queries where S3 Select allows applications to retrieve only a subset of data from an object.  
 </div>
@@ -97,21 +95,21 @@ We aim to complete the implementation of S3 Select in the D4N Caching mechanism,
 
 Detailed user stories, plan and backlog will be via Tiaga 
 
-Week 1 & 2  
-			- Set up Ceph and Spark; have D4N with S3 Select run basic queries 
-              Individual Tasks 
-								1. Build and run master Ceph
-								2. Build Spark with S3 Select
-		   						3. D4N and S3 Select codewalk; understand workflow for S3 Select on Spark and Arrow with Ceph 
+Week (2/16 - 2/22) 
+1. Build and run master Ceph. 
+2. Begin to build Spark with S3 Select
 
-Week 3,4,5,6 
-			- Implementation 
+Week (2/23 - 3/1)
+1. D4N and S3 Select codewalk; understand workflow for S3 Select on Spark and Arrow with Ceph 
 
-Week 7 & 8 
-			- Testing and Performance evaluation
+Week (3/2 - 3/29)
+1. Implementation
 
-Week 8 & 9 
-			- Documentation
+Week (3/30 - 4/8)
+1. Testing and Performance evaluation
+
+Week  (4/9 - 4/19)
+1. Documentation
 
 
 
