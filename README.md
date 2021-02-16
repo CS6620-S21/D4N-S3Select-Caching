@@ -30,6 +30,8 @@ The D4N Caching architecture is a caching middleware between the Clients and Cep
 <!-- Some technical descp about D4N -->
 <!-- System archictecture Diagram -->
 ![System architecture]( D4N%20Block%20Diagram.png "D4N Architecture")
+
+<div style="text-align: justify">
 1. <b>Ceph</b> - Ceph is a distributed storage platform implemented as an object storage. It is highly scalable and distributed system running on a compute cluster. It stripes and distributes the file across multiple nodes for high throughput and fault-tolerance. It supports Object, Block, and File System storage by providing different layers over object storage, and a single interface to all the three storage types. It supports these functionalities using various daemons (cluster monitors, object storage devices, http gateways, etc.) running on top of each node.
 
 2. RGW -
@@ -47,7 +49,7 @@ Redis is an open source (BSD licensed), in-memory data structure store, used as 
 8. <b>Compute Nodes/Clients</b> - The compute nodes are the spark jobs that run on the cluster. They are the users of the D4N caching mechanism and they request data from the Ceph storage. However, they do not directly communicate with the Ceph storage, they do that through the Rados gatway(RGW). Part of this project, also focuses on enhancing the clients to accept the results of S3 select, from the cache, in Arrow format.
 9. <b> Spark </b> -  Apache Spark is an open-source, distributed processing system for big data workload. Spark utilizes in-memory caching, and optimized query execution for fast analytic queries against data of any size. Spark will enable code resuage across multiple workloads—batch processing and interactive queries.
 Part of this project involves modifying Spark's System to request S3 Select queries where S3 Select allows applications to retrieve only a subset of data from an object.  
-
+</div>
 <!-- System archictecture Diagram -->
 ![System architecture]( Spark%20S3%20Select%20Pipeline.png "Spark - S3 Select Pipeline")
 
