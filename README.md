@@ -92,7 +92,7 @@ To accomplish our overall goal, we will break it into these subtasks:
 
 ## 5. Acceptance criteria
 
-Part 1 - We aim to complete the implementation of S3 Select in the D4N caching cluster, which is minimum acceptance criteria for the project. The product which satisfies the minumum acceptance criteria will support the following operations -
+1. <b>Part A </b> - We aim to complete the implementation of S3 Select in the D4N caching cluster, which is minimum acceptance criteria for the project. The product which satisfies the minumum acceptance criteria will support the following operations -
 
 1. Merge S3Select pipeline into the Rados gateway (part of D4N).
 2. Make sure that the Rados gateway can accept S3 Select requests and process it using newly merged S3Select pipeline.
@@ -106,7 +106,7 @@ Part 1 - We aim to complete the implementation of S3 Select in the D4N caching c
 ## Optional:
 If time permits, test the latency of an S3 Select request on a cached and an uncached object, and report the results.
 
-Part 2 - We plan to accommodate S3 Select to return the result of queried CSV in an Arrow format. 
+2. <b>Part B </b>- We plan to accommodate S3 Select to return the result of queried CSV in an Arrow format. 
 
 To test, 
 
