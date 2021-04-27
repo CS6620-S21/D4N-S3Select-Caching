@@ -96,26 +96,42 @@ We aim to complete the implementation of S3 Select in the D4N Caching mechanism,
 2. The RGW will be able to run the queries on the Ceph storage cluster and retrive the results.
 3. The results of S3 select queries will be cached in the distributed cache and indexed in the global directory.
 
-## 6.  Release Planning:
+## 6.  Project Timeline:
 
 Detailed user stories, plan and backlog will be via Tiaga 
 
-Week (2/16 - 2/22) 
-1. Build and run master Ceph. 
-2. Begin to build Spark with S3 Select
+Weeks (2/12 - 2/26) 
+1. Build and run master Ceph,
+2. Understand RGW Codebase
+3. Investigate Arrow and Spark Integration
+5. Begin to build Spark with S3 Select
 
-Week (2/23 - 3/1)
-1. D4N and S3 Select codewalk; understand workflow for S3 Select on Spark and Arrow with Ceph 
+Weeks (2/27 - 3/12)
+1. D4N and S3 Select codewalk; understand workflow for S3 Select on Spark and Arrow with Ceph.
+2. Connect D4N and redis
+3. Setup backend Ceph
+4. Run batch jobs and python test scripts
 
-Week (3/2 - 3/29)
-1. Implementation
+Weeks (3/13 - 3/26)
+1. Setup spark jobs using Spark-Select
+2. Test S3 Select with D4N
+3. Test S3 Select with Backend Ceph
+4. Debug D4N S3 Select with Cached objects
 
-Week (3/30 - 4/8)
-1. Testing and Performance evaluation
 
-Week  (4/9 - 4/19)
-1. Documentation
+Week  (3/30 - 4/13)
+1. Setup Docker images for S3 Select Standalone branch
+2. Run tests on containerized S3 Select
+3. Debug D4N (1/2) S3 Select with Uncached objects
+4. Study ARROW IPC, IO and Flight RPC formats
+5. Convert .csv to .arrow format using Arrow CPP Libraries
 
+Week (4/14 - 4/26)
+1.  Create readers to visually analyse arrow and parquet files
+2.  Parse S3 Select projections based on data types
+3.  Parse S3 Select query results to Arrow by integrating Arrow format in S3 Select Library
+4.  Debug D4N (2/2), Inspect packet exchanges between different clusters with TCPDUMP
+5.  Test S3 Select with both Cached and Uncached objects 
 
 
 
