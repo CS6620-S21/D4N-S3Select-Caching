@@ -3,28 +3,28 @@
 
 ** **
 
-- [1. Vision and Goals Of The Project:](#1-vision-and-goals-of-the-project)
-- [2. Users/Personas Of The Project:](#2-users-personas-of-the-project)
-- [3. Scope and Features Of The Project:](#3-scope-and-features-of-the-project)
+- [1. Vision and Goals Of The Project](#1-vision-and-goals-of-the-project)
+- [2. Users/Personas Of The Project](#2-users-personas-of-the-project)
+- [3. Scope and Features Of The Project](#3-scope-and-features-of-the-project)
 - [4. Solution Concept](#4-solution-concept)
 - [5. Acceptance criteria](#5-acceptance-criteria)
-- [6. Release Planning:](#6-release-planning)
+- [6. Release Planning](#6-release-planning)
 
 
-## 1.   Vision and Goals Of The Project:
+## 1.   Vision and Goals Of The Project
 
 D4N is a multi-layer cooperative caching solution which aims to improve performance in distributed systems by implementing a smart caching algorithm, which caches data on the access side of each layer hierarchical network topology, adaptively adjusting cache sizes of each layer based on observed workload patterns and network congestion.
 
 The goal of this project is to enhance D4N to directly support S3 Select, a new S3 feature that allows applications to select, transform, and summarize data within S3 objects using SQL query commands. This will allow the clients to read and cache only a subset of object, stored in the Ceph cluster, rather than retrieving the entire object over the network, eventually reducing the traffic of data over the network.
 
-## 2. Users/Personas Of The Project:
+## 2. Users/Personas Of The Project
 
 The only users in the D4N architecture are the Clients, which are the Spark jobs running on the server racks. The Spark jobs read and write data from the Ceph storage clusters.
 
 The D4N Caching architecture is a caching middleware between the Clients and Ceph storage. 
 <!-- The Rados Gatway(RGW) is the object storage interface of Ceph and it is responsible for the communication between the clients and  ceph.  -->
 
-## 3.   Scope and Features Of The Project:
+## 3.   Scope and Features Of The Project
 
 1. Create client workloads that generate S3 Select request traffic, and can measure throughput and latency of same.
 2. Design and implement a prototype S3 select cache strategy or strategies within D4N; S3 Select to read subset of object from Ceph.
@@ -80,17 +80,19 @@ To accomplish our overall goal, we will break it into these subtasks:
 
 2. Make Spark request and understand the Arrow file format - Queried results from computation would be returned from D4N Cache or the Remote Ceph Storage Cluster, in Arrow format(b) for efficient shipment of columnar data. In current implementation, Spark jobs support CSV format of data. 
 
-3. Combine S3 Select with D4N - D4N(c) to be merged with S3 to have S3 compatible object storage. S3 API extended with Select queries is now understood by the D4N. 
+3. Add Cient-side implementation for Arrow in order to parse results from S3 Select engine in Arrow format - Add functionality in S3 Select to return result of CSV queried files in Arrow format.
 
-4. Cache the results in D4N from remote Ceph cluster - Queried results(d) from the Remote Ceph Storage Cluster is returned to Spark jobs and cached in the 2 layer cache in D4N for future use. 
+4. Combine S3 Select with D4N - D4N(c) to be merged with S3 to have S3 compatible object storage. S3 API extended with Select queries is now understood by the D4N. 
 
-5. Lookup in the cache before forwarding the request to the remote Ceph cluster - The S3 Select requests by Spark jobs for retreiving objects would be first checked in D4N (in the second layer, as contents from all cache servers would be pooled here) before requesting the Remote Ceph Storage Cluster. The presence of D4N helps accelerate workloads with strong locality and limited network connectivity between compute clusters and data storage.
+5. Cache the results in D4N from remote Ceph cluster - Queried results(d) from the Remote Ceph Storage Cluster is returned to Spark jobs and cached in the 2 layer cache in D4N for future use. 
 
-6. Retrieve the data found in D4N or generate a request to the remote Ceph - The subset of object queried if found, is returned in Arrow format from the Object storage cache. If not, a new request(e) is placed to the Remote Ceph storage cluster via the object interface, RGW(RADOS Gateway).  
+6. Lookup in the cache before forwarding the request to the remote Ceph cluster - The S3 Select requests by Spark jobs for retreiving objects would be first checked in D4N (in the second layer, as contents from all cache servers would be pooled here) before requesting the Remote Ceph Storage Cluster. The presence of D4N helps accelerate workloads with strong locality and limited network connectivity between compute clusters and data storage.
+
+7. Retrieve the data found in D4N or generate a request to the remote Ceph - The subset of object queried if found, is returned in Arrow format from the Object storage cache. If not, a new request(e) is placed to the Remote Ceph storage cluster via the object interface, RGW(RADOS Gateway).  
 
 ## 5. Acceptance criteria
 
-We aim to complete the implementation of S3 Select in the D4N caching cluster, which is minimum acceptance criteria for the project. The product which satisfies the minumum acceptance criteria will support the following operations -
+Part 1 - We aim to complete the implementation of S3 Select in the D4N caching cluster, which is minimum acceptance criteria for the project. The product which satisfies the minumum acceptance criteria will support the following operations -
 
 1. Merge S3Select pipeline into the Rados gateway (part of D4N).
 2. Make sure that the Rados gateway can accept S3 Select requests and process it using newly merged S3Select pipeline.
@@ -104,7 +106,15 @@ We aim to complete the implementation of S3 Select in the D4N caching cluster, w
 ## Optional:
 If time permits, test the latency of an S3 Select request on a cached and an uncached object, and report the results.
 
-## 6.  Project Timeline:
+Part 2 - We plan to accommodate S3 Select to return the result of queried CSV in an Arrow format. 
+
+To test, 
+
+1. Run a simple S3 Select query on a CSV. 
+2. The result must be stored in an .arrow file. 
+3. Since Arrow is an in-memory format, use a reader to read and display the Arrow result. 
+
+## 6.  Project Timeline
 
 Detailed user stories, plan and backlog will be via Tiaga 
 
