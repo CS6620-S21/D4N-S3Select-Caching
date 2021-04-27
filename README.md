@@ -90,11 +90,19 @@ To accomplish our overall goal, we will break it into these subtasks:
 
 ## 5. Acceptance criteria
 
-We aim to complete the implementation of S3 Select in the D4N Caching mechanism, which is minimum acceptance criteria for the project. The product which satisfies the minumum acceptance criteria will support the following operations -
+We aim to complete the implementation of S3 Select in the D4N caching cluster, which is minimum acceptance criteria for the project. The product which satisfies the minumum acceptance criteria will support the following operations -
 
-1. The Rados gateway(RGW) will be able to accept S3 select requests.
-2. The RGW will be able to run the queries on the Ceph storage cluster and retrive the results.
-3. The results of S3 select queries will be cached in the distributed cache and indexed in the global directory.
+1. Merge S3Select pipeline into the Rados gateway (part of D4N).
+2. Make sure that the Rados gateway can accept S3 Select requests and process it using newly merged S3Select pipeline.
+3. Test D4N for the following :
+   a. Can a S3 Select request to D4N generate a backend Ceph request to fetch the uncached object? 
+   b. Can D4N cache this recently fetched object through the S3 Select pipeline?
+   c. Can D4N run the S3 Select query on top of an object that was recently brought in?
+   d. Can D4N send the S3 Select query results back to the client?
+   e. Can D4N run S3 Select query on cached objects? The object could have been cached as an outcome of a previous S3 or S3 Select request.
+
+Optional:
+If time permits, test the latency of an S3 Select request on a cached and an uncached object, and report the results.
 
 ## 6.  Project Timeline:
 
