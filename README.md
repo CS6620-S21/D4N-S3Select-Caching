@@ -26,9 +26,9 @@ The D4N Caching architecture is a caching middleware between the Clients and Cep
 
 ## 3.   Scope and Features Of The Project
 
-1. Create client workloads that generate S3 Select request traffic, and can measure throughput and latency of same.
-2. Design and implement a prototype S3 select cache strategy or strategies within D4N; S3 Select to read subset of object from Ceph.
-3. Cache data and update the global directory, return formatted response in Arrow. Hence, evaluating the result of the S3 Select cache
+1. Design and implement a prototype S3 select cache strategy or strategies within D4N; S3 Select to read subset of object from Ceph.
+2. Cache data and update the global directory, return formatted response in Arrow. Hence, evaluating the result of the S3 Select cache
+3. Add support for converting the S3-select query results to Apache Arrow format.
 4. Update the Spark jobs to read the response in arrow format.
 
 
@@ -90,29 +90,60 @@ To accomplish our overall goal, we will break it into these subtasks:
 
 7. Retrieve the data found in D4N or generate a request to the remote Ceph - The subset of object queried if found, is returned in Arrow format from the Object storage cache. If not, a new request(e) is placed to the Remote Ceph storage cluster via the object interface, RGW(RADOS Gateway).  
 
+### Final Implementation details -
+**This section focuses on the final state of the implementation and design after working on the project through the semester.**
+
+#### 1. D4N Caching -
+
+#### 2. Apache Arrow -
+The Apache Arrow integration was aimed at making the S3-Select query parsing more efficient at the client side, as Arrow's standardized data storage format provides significant performace advantage while transferring large amounts of data between systems.
+
+Hence we divided this task into components -
+a. Client-side integration
+b. Server-side integration
+![Components of Arrow integration](https://i.imgur.com/9PY9hfR.png)
+<i>Figure 4: This diagram describes the two components of Arrow integration task</i>
+
+### a. Client-side integration
+For the Client-side integration, we decided to use [Spark-select](https://github.com/minio/spark-select), an open-source S3-Select client for Apache Spark. Our goal was to add the support for parsing the result of the S3-Select query from the object store, assumed to be already converted to Arrow format here, using the Arrow API, so that it can be used by the Spark job. 
+However, this is not possible as we found that the Spark-select uses the AWS API to connect and send the S3-Select requests to the object store. The AWS API also handles the raw response from the object store, and hands it over to the Spark-select after parsing it. Our initial goal was to add the code for Apache Arrow parsing, where the raw query result is being parsed. However as this handled by AWS's proprietary code, we could not edit it. Hence were unable to complete the task of Client-side integration of Apache Arrow. 
+
+### b. Server-side integration
+
+For the Server-side integration, we used [s3select](https://github.com/ceph/s3select), which is a open-source implementation of the S3-select engine. Here we understood the code and were able to indentify the correct place to add the support for converting the result of the S3-select queries to Arrow format. You can find our code in our [fork](https://github.com/neelgeek/s3select/tree/arrow_integrate). 
+We decided to convert the query result and store it into a arrow file(with .arrow extension), this is because this repo of s3select is not integrated with the D4N cache and hence does not contain the logic to return the results to the client who made the s3-select request. 
+
+A query result is converted to Arrow format and written to a Arrow file as follows - 
+1. Using the Arrow [Arraybuilder API](https://arrow.apache.org/docs/cpp/api/builder.html) to arrange the query results to columnar format. 
+2. Use Arrow [Table API](https://arrow.apache.org/docs/cpp/api/table.html#tables) to write it to to a Arrow table.
+3. Write the Arrow table to a Arrow file using the Arrow [IO API](https://arrow.apache.org/docs/cpp/api/io.html).
+
+Hence we were able to complete the backend part of Apache Arrow integration. 
+
+
 ## 5. Acceptance criteria
 
-1. <b>Part A </b> - We aim to complete the implementation of S3 Select in the D4N caching cluster, which is minimum acceptance criteria for the project. The product which satisfies the minumum acceptance criteria will support the following operations -
+Part 1 - We aim to complete the implementation of S3 Select in the D4N caching cluster, which is minimum acceptance criteria for the project. The product which satisfies the minumum acceptance criteria will support the following operations -
 
 1. Merge S3Select pipeline into the Rados gateway (part of D4N).
 2. Make sure that the Rados gateway can accept S3 Select requests and process it using newly merged S3Select pipeline.
 3. Test D4N for the following :
-   1. Can a S3 Select request to D4N generate a backend Ceph request to fetch the uncached object? 
-   2. Can D4N cache this recently fetched object through the S3 Select pipeline?
-   3. Can D4N run the S3 Select query on top of an object that was recently brought in?
-   4. Can D4N send the S3 Select query results back to the client?
-   5. Can D4N run S3 Select query on cached objects? The object could have been cached as an outcome of a previous S3 or S3 Select request.
+   a. Can a S3 Select request to D4N generate a backend Ceph request to fetch the uncached object?
+   b. Can D4N cache this recently fetched object through the S3 Select pipeline?
+   c. Can D4N run the S3 Select query on top of an object that was recently brought in?
+   d. Can D4N send the S3 Select query results back to the client?
+   e. Can D4N run S3 Select query on cached objects? The object could have been cached as an outcome of a previous S3 or S3 Select request.
 
 
-2. <b>Part B </b>- We plan to accommodate S3 Select to return the result of queried CSV in an Arrow format. 
+Part 2 - We plan to accommodate S3 Select to return the result of queried CSV in an Arrow format. 
 
 To test, 
 
 1. Run a simple S3 Select query on a CSV. 
-2. The result must be stored in an .arrow file. 
-3. Since Arrow is an in-memory format, use a reader to read and display the Arrow result. 
+2. You should see the result being stored in an .arrow file. 
+3. Since Arrow is an in-memory format, we take help of a reader to read and display the result. 
 
-## Optional:
+### Optional:
 If time permits, test the latency of an S3 Select request on a cached and an uncached object, and report the results.
 
 ## 6.  Project Timeline
