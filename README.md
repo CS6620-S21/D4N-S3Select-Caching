@@ -119,14 +119,14 @@ Weeks (3/13 - 3/26)
 4. Debug D4N S3 Select with Cached objects
 
 
-Week  (3/30 - 4/13)
+Weeks  (3/30 - 4/13)
 1. Setup Docker images for S3 Select Standalone branch
 2. Run tests on containerized S3 Select
 3. Debug D4N (1/2) S3 Select with Uncached objects
 4. Study ARROW IPC, IO and Flight RPC formats
 5. Convert .csv to .arrow format using Arrow CPP Libraries
 
-Week (4/14 - 4/26)
+Final Weeks (4/14 - 4/26)
 1.  Create readers to visually analyse arrow and parquet files
 2.  Parse S3 Select projections based on data types
 3.  Parse S3 Select query results to Arrow by integrating Arrow format in S3 Select Library
