@@ -103,8 +103,6 @@ To accomplish our overall goal, we will break it into these subtasks:
    4. Can D4N send the S3 Select query results back to the client?
    5. Can D4N run S3 Select query on cached objects? The object could have been cached as an outcome of a previous S3 or S3 Select request.
 
-## Optional:
-If time permits, test the latency of an S3 Select request on a cached and an uncached object, and report the results.
 
 2. <b>Part B </b>- We plan to accommodate S3 Select to return the result of queried CSV in an Arrow format. 
 
@@ -113,6 +111,9 @@ To test,
 1. Run a simple S3 Select query on a CSV. 
 2. The result must be stored in an .arrow file. 
 3. Since Arrow is an in-memory format, use a reader to read and display the Arrow result. 
+
+## Optional:
+If time permits, test the latency of an S3 Select request on a cached and an uncached object, and report the results.
 
 ## 6.  Project Timeline
 
