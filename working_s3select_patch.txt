@@ -1,0 +1,384 @@
+diff --git a/.gitmodules b/.gitmodules
+index 6280d8e93e..a129c4f4e4 100644
+--- a/.gitmodules
++++ b/.gitmodules
+@@ -70,3 +70,15 @@
+ [submodule "s3select"]
+ 	path = src/s3select
+ 	url = https://github.com/ceph/s3select.git
++[submodule "src/jaegertracing/opentracing-cpp"]
++	path = src/jaegertracing/opentracing-cpp
++	url = https://github.com/opentracing/opentracing-cpp.git
++	branch = v1.6.0
++[submodule "src/jaegertracing/jaeger-client-cpp"]
++	path = src/jaegertracing/jaeger-client-cpp
++	url = https://github.com/ceph/jaeger-client-cpp.git
++	branch = hunter-disabled
++[submodule "src/jaegertracing/thrift"]
++	path = src/jaegertracing/thrift
++	url = https://github.com/apache/thrift.git
++	branch = 0.13.0
+diff --git a/src/common/legacy_config_opts.h b/src/common/legacy_config_opts.h
+index ab53e55761..5442aeca03 100644
+--- a/src/common/legacy_config_opts.h
++++ b/src/common/legacy_config_opts.h
+@@ -1254,7 +1254,9 @@ OPTION(rgw_cache_size ,OPT_INT) // rgw local read cache capacity
+ OPTION(rgw_directory_address1 ,OPT_STR) // cache directory address 
+ OPTION(rgw_directory_address2 ,OPT_STR) // cache directory address 
+ OPTION(rgw_directory_address3 ,OPT_STR) // cache directory address 
+-OPTION(rgw_directory_port ,OPT_INT) // cache directory port
++OPTION(rgw_directory_port1 ,OPT_INT) // cache directory port
++OPTION(rgw_directory_port2 ,OPT_INT) // cache directory port
++OPTION(rgw_directory_port3 ,OPT_INT) // cache directory port
+ 
+ 
+ OPTION(rgw_max_attr_name_len, OPT_SIZE)
+diff --git a/src/common/options.cc b/src/common/options.cc
+index 8091a5cf93..de1b3d0a79 100644
+--- a/src/common/options.cc
++++ b/src/common/options.cc
+@@ -7025,10 +7025,18 @@ std::vector<Option> get_rgw_options() {
+     .set_default("127.0.0.1")
+     .set_description("rgw directory address"),
+ 
+-    Option("rgw_directory_port", Option::TYPE_INT, Option::LEVEL_ADVANCED)
++    Option("rgw_directory_port1", Option::TYPE_INT, Option::LEVEL_ADVANCED)
+     .set_default(7000)
+-    .set_description("rgw directory port"),
++    .set_description("rgw directory port1"),
+ 
++    Option("rgw_directory_port2", Option::TYPE_INT, Option::LEVEL_ADVANCED)
++    .set_default(7001)
++    .set_description("rgw directory port2"),
++
++    Option("rgw_directory_port3", Option::TYPE_INT, Option::LEVEL_ADVANCED)
++    .set_default(7002)
++    .set_description("rgw directory port3"),
++    
+     Option("aging_interval_in_minutes", Option::TYPE_INT, Option::LEVEL_ADVANCED)
+     .set_default(5)
+     .set_description("rgw write cache aging interval in minutes"),
+diff --git a/src/json_spirit/json_spirit_reader_template.h b/src/json_spirit/json_spirit_reader_template.h
+index 2d0b3a440e..99c2b6cff4 100644
+--- a/src/json_spirit/json_spirit_reader_template.h
++++ b/src/json_spirit/json_spirit_reader_template.h
+@@ -613,8 +613,11 @@ namespace json_spirit
+             return true;
+         }
+         catch( ... )
++        //catch (const std::exception &exc)
+         {
+-            return false;
++          // catch anything thrown within try block that derives from std::exception
++          //std::cerr << exc.what();
++          return false;
+         }
+     }
+ 
+diff --git a/src/logrotate.conf b/src/logrotate.conf
+index e49baec0cd..a54094be77 100644
+--- a/src/logrotate.conf
++++ b/src/logrotate.conf
+@@ -1,4 +1,16 @@
+-/var/log/ceph/*.log {
++/home/centos/d4n/ceph/build/run/c1/out/*.log {
++    rotate 7
++    daily
++    compress
++    sharedscripts
++    postrotate
++        killall -q -1 ceph-mon ceph-mgr ceph-mds ceph-osd ceph-fuse radosgw rbd-mirror || pkill -1 -x "ceph-mon|ceph-mgr|ceph-mds|ceph-osd|ceph-fuse|radosgw|rbd-mirror" || true
++    endscript
++    missingok
++    notifempty
++    su root ceph
++}
++/home/centos/d4n/ceph/build/run/c2/out/*.log {
+     rotate 7
+     daily
+     compress
+diff --git a/src/rgw/rgw_cacherequest.cc b/src/rgw/rgw_cacherequest.cc
+index 0745f99e24..4fae8bbfd2 100644
+--- a/src/rgw/rgw_cacherequest.cc
++++ b/src/rgw/rgw_cacherequest.cc
+@@ -10,6 +10,7 @@ int RemoteRequest::prepare_op(std::string key,  bufferlist *bl, off_t read_len,
+   this->aio = aio;
+ //  this->bl = bl;
+   this->ofs = ofs;
++  this->read_ofs = read_ofs;
+   this->key = key;
+   this->read_len = read_len;
+   this->dest = dest;
+diff --git a/src/rgw/rgw_directory.cc b/src/rgw/rgw_directory.cc
+index 2a82443370..d06148694f 100644
+--- a/src/rgw/rgw_directory.cc
++++ b/src/rgw/rgw_directory.cc
+@@ -183,13 +183,13 @@ void RGWObjectDirectory::findClient(string key, cpp_redis::client *client){
+   int slot = 0;
+   slot = hash_slot(key.c_str(), key.size());
+   if (slot < 5461)
+-    client->connect(cct->_conf->rgw_directory_address1, cct->_conf->rgw_directory_port);
++    client->connect(cct->_conf->rgw_directory_address1, cct->_conf->rgw_directory_port1);
+   //client = &client1;
+   else if (slot < 10923)
+-    client->connect(cct->_conf->rgw_directory_address2, cct->_conf->rgw_directory_port);
++    client->connect(cct->_conf->rgw_directory_address2, cct->_conf->rgw_directory_port2);
+   //client = &client2;
+   else
+-    client->connect(cct->_conf->rgw_directory_address3, cct->_conf->rgw_directory_port);
++    client->connect(cct->_conf->rgw_directory_address3, cct->_conf->rgw_directory_port3);
+   //client = &client3;
+ }
+ 
+@@ -198,14 +198,14 @@ void RGWBlockDirectory::findClient(string key, cpp_redis::client *client){
+   int slot = 0;
+   slot = hash_slot(key.c_str(), key.size());
+   if (slot < 5461)
+-    client->connect(cct->_conf->rgw_directory_address1, cct->_conf->rgw_directory_port);
++    client->connect(cct->_conf->rgw_directory_address1, cct->_conf->rgw_directory_port1);
+   //client = &client1;
+   else if (slot < 10923)
+     //client = &client2;
+-    client->connect(cct->_conf->rgw_directory_address2, cct->_conf->rgw_directory_port);
++    client->connect(cct->_conf->rgw_directory_address2, cct->_conf->rgw_directory_port2);
+   else
+     //client = &client3;
+-    client->connect(cct->_conf->rgw_directory_address3, cct->_conf->rgw_directory_port);
++    client->connect(cct->_conf->rgw_directory_address3, cct->_conf->rgw_directory_port3);
+ }
+ 
+ /* builds the index for the directory
+diff --git a/src/rgw/rgw_op.cc b/src/rgw/rgw_op.cc
+index 997a7187b6..4ea5595a91 100644
+--- a/src/rgw/rgw_op.cc
++++ b/src/rgw/rgw_op.cc
+@@ -8272,8 +8272,11 @@ void RGWGetObj::cache_execute(){
+   RGWRados::Object op_target(store->getRados(), dest_bucket_info, *static_cast<RGWObjectCtx *>(s->obj_ctx), obj);
+   RGWRados::Object::Read read_op(&op_target);
+   s->obj_size = c_obj.size_in_bytes;
+-
++  this->lo_etag = c_obj.etag;
+   range_str = s->info.env->get("HTTP_RANGE");
++  op_ret = get_params();
++  if (op_ret < 0)
++    return ;
+   op_ret = init_common();
+   if (op_ret < 0)
+     return ;
+diff --git a/src/rgw/rgw_process.cc b/src/rgw/rgw_process.cc
+index 0bb288211e..e1c5a60ed2 100644
+--- a/src/rgw/rgw_process.cc
++++ b/src/rgw/rgw_process.cc
+@@ -82,6 +82,8 @@ void RGWProcess::RGWWQ::_process(RGWRequest *req, ThreadPool::TPHandle &) {
+   perfcounter->inc(l_rgw_qactive, -1);
+ }
+ 
++//pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
++
+ int rgw_process_authenticated(RGWHandler_REST * const handler,
+                               RGWOp *& op,
+                               RGWRequest * const req,
+@@ -98,8 +100,10 @@ int rgw_process_authenticated(RGWHandler_REST * const handler,
+   int ret;
+   ldpp_dout(op, 2) << "rgw_process_authenticated" << dendl;
+    if ( (strcmp("get_obj",op->name()) == 0) && (s->cct->_conf->rgw_datacache_enabled) ){
+-    if ( (OP_GET == s->op) ) {
++    if ( (OP_GET == s->op || s->op == OP_POST) ) {
++          //pthread_mutex_lock(&mutex);
+ 	  ret = op->cache_authorize();
++          //pthread_mutex_lock(&mutex);
+ 	  ldpp_dout(op, 2) << "get backend acls " << ret << dendl;
+ 	  if (!(ret)) {
+ 		s->err.http_ret = 404; //not found 401 not authorize
+@@ -252,7 +256,9 @@ int process_request(rgw::sal::RGWRadosStore* const store,
+   should_log = mgr->get_logging();
+ 
+   ldpp_dout(s, 2) << "getting op " << s->op << dendl;
++  //pthread_mutex_lock(&mutex);
+   op = handler->get_op();
++  //pthread_mutex_unlock(&mutex);
+   if (!op) {
+     abort_early(s, NULL, -ERR_METHOD_NOT_ALLOWED, handler);
+     goto done;
+diff --git a/src/rgw/rgw_rados.cc b/src/rgw/rgw_rados.cc
+index 6444edba86..93c6b53beb 100644
+--- a/src/rgw/rgw_rados.cc
++++ b/src/rgw/rgw_rados.cc
+@@ -6319,25 +6319,29 @@ struct get_obj_data {
+       auto bl = std::move(completed.front().data);
+       completed.pop_front_and_dispose(std::default_delete<rgw::AioResultEntry>{});
+       offset += bl.length();
++      ldout(cct, 20) << "cache_flush_handle" << " bl.length=" << bl.length() << dendl;
+       if(cct->_conf->rgw_datacache_enabled and cache_enable){
+   //      bufferlist chunk_buffer;	
+ //	chunk_buffer.append(bl);
+         key = get_pending_key();
+         cache_block c_block = get_pending_block(key); 	
+ //        if (true){
++        ldout(cct, 20) << "insode put_cache" << key << " bl.length=" << bl.length() << dendl;
+         if (bl.length() == 0x400000){
+-      		string str = cct->_conf->rgw_frontends;
+-		  std::size_t pos = str.find("endpoint=");
+-		  std::string str2 = str.substr(pos);
+-		  std::string endpoint = str2.substr(9);    
+-		  c_block.hosts_list.push_back(endpoint);
++      	//	string str = cct->_conf->rgw_frontends;
++	//	std::size_t pos = str.find("endpoint=");
++	//	  std::string str2 = str.substr(pos);
++	//	  std::string endpoint = str2.substr(9);    
++
++	//	  c_block.hosts_list.push_back(endpoint);
++		  c_block.hosts_list.push_back("127.0.0.1"); 
+ 		  store->put_data(key, bl , bl.length(), &c_block); 
+ //		  store->put_data(key, chunk_buffer, chunk_buffer.length(), &c_block); 
+         }
+       }
+ 
+       int r = client_cb->handle_data(bl, 0, bl.length());
+-    // ldout(cct, 20) << "after_handle" << key << " bl.length=" << bl.length() << dendl;	
++       ldout(cct, 20) << "after_handle" << key << " bl.length=" << bl.length() << dendl;	
+       if (r < 0) {
+ 	return r;
+       }
+@@ -9329,9 +9333,11 @@ int RGWRados::get_cache_obj_iterate_cb(cache_block& c_block, off_t obj_ofs, off_
+ 	  auto obj = d->store->svc.rados->obj(read_obj);
+ 	  r = obj.open();
+ 	  if (r < 0) {
+-    	ldout(cct, 4) << "failed to open rados context for " << read_obj << dendl;
+-	    return r; }
++	    ldout(cct, 4) << "failed to open rados context for " << read_obj << dendl;
++	  return r; }
++	  dout(10) << __func__   << "writecache before aio:" << oid<< " read_len: " << read_len << "obj_ofs: " << obj_ofs <<dendl; 
+ 	  auto completed = d->aio->get(obj, rgw::Aio::librados_op(std::move(op), d->yield), cost, id);
++	  dout(10) << __func__   << "writecache after aio:" << oid<< dendl; 
+ 	  return d->flush(std::move(completed));
+     
+ 	} else { //read from backend
+@@ -9345,8 +9351,9 @@ int RGWRados::get_cache_obj_iterate_cb(cache_block& c_block, off_t obj_ofs, off_
+      	string path = c_block.c_obj.bucket_name + "/"+c_block.c_obj.obj_name;
+         auto completed = d->aio->get(obj, rgw::Aio::remote_op(std::move(op) , d->yield, obj_ofs, read_ofs, read_len, cct->_conf->backend_url, c, &c_block, path , datacache), cost, id);
+  //     return d->drain();
+-    return d->flush(std::move(completed));
+-  }}
++	return d->flush(std::move(completed));
++	}
++  }
+ } 
+ 
+ void stripTags( string &text )
+@@ -9362,6 +9369,7 @@ void stripTags( string &text )
+ }
+ 
+ 
++#define FIXED_JSON
+ int RGWRados::retrieve_obj_acls(cache_obj& c_obj){
+   ldout(cct, 20) << __func__ <<dendl;
+   get_s3_credentials(store->getRados(), c_obj.owner, c_obj.accesskey);
+@@ -9400,14 +9408,37 @@ int RGWRados::retrieve_obj_acls(cache_obj& c_obj){
+     return ret;
+ 
+   bufferlist& extra_data_bl = cb.get_extra_data();
++  //#ifdef FIXED_JSON
++  //const char* tmp_str = "{\"attrs\":[{\"key\":\"user.rgw.acl\",\"val\":\"AgKHAAAAAwIVAAAABQAAADEyMzQ1CAAAAHByYXNoYW50BANmAAAAAQEAAAAFAAAAMTIzNDUPAAAAAQAAAAUAAAAxMjM0NQUDOQAAAAICBAAAAAAAAAAFAAAAMTIzNDUAAAAAAAAAAAICBAAAAA8AAAAIAAAAcHJhc2hhbnQAAAAAAAAAAAAAAAAAAAAA\"},{\"key\":\"user.rgw.content_type\",\"val\":\"dGV4dC9wbGFpbgA=\"},{\"key\":\"user.rgw.etag\",\"val\":\"MGFiODI4YTM5Y2ZhYWFjZTRhNmE4NmYyZDA0ODUxMmE=\"},{\"key\":\"user.rgw.idtag\",\"val\":\"ZTJmN2FjYTgtMjAyNy00NDNlLTgxNjktNzJlYzM2MjQyNmUxLjQxNzQuNgA=\"},{\"key\":\"user.rgw.manifest\",\"val\":\"BwY2AQAARwEAAAAAAAAAAAAAAAYGkAAAAAoKbwAAAAgAAABwcmFzaGFudCsAAABlMmY3YWNhOC0yMDI3LTQ0M2UtODE2OS03MmVjMzYyNDI2ZTEuNDE4MC4xKwAAAGUyZjdhY2E4LTIwMjctNDQzZS04MTY5LTcyZWMzNjI0MjZlMS40MTgwLjEAAAAAAAAAAAAPAAAAc2FtcGxlX2RhdGEuY3N2AAAAAEcBAAAAAAAAAABAAAAAAAAhAAAALlA3dDJlYXZoY3VOVVFaVzZkMnU4c0Q0Z2piYTR3T0JfAQAAAAAAAAAAAAAAAgEgAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAABEAAABkZWZhdWx0LXBsYWNlbWVudBEAAABkZWZhdWx0LXBsYWNlbWVudA==\"},{\"key\":\"user.rgw.pg_ver\",\"val\":\"AAAAAAAAAAA=\"},{\"key\":\"user.rgw.source_zone\",\"val\":\"AAAAAA==\"},{\"key\":\"user.rgw.storage_class\",\"val\":\"U1RBTkRBUkQ=\"},{\"key\":\"user.rgw.tail_tag\",\"val\":\"ZTJmN2FjYTgtMjAyNy00NDNlLTgxNjktNzJlYzM2MjQyNmUxLjQxNzQuNgA=\"},{\"key\":\"user.rgw.x-amz-content-sha256\",\"val\":\"ZmE0NzI0N2E2YmQ5Y2RjODU1MGY2MmIzMWM0MWMzMzczMDdmOGRkZDJlNjllN2U4ZmE2Mjc1ODZjYmNiMzk4NAA=\"},{\"key\":\"user.rgw.x-amz-date\",\"val\":\"MjAyMTA0MDlUMTQzMDQxWgA=\"},{\"key\":\"user.rgw.x-amz-meta-s3cmd-attrs\",\"val\":\"YXRpbWU6MTYxNzk3NjcwMS9jdGltZToxNjE1NTI2MzczL2dpZDoxMDAwL2duYW1lOmNlbnRvcy9tZDU6MGFiODI4YTM5Y2ZhYWFjZTRhNmE4NmYyZDA0ODUxMmEvbW9kZTozMzIwNC9tdGltZToxNjE1NTI2MzczL3VpZDoxMDAwL3VuYW1lOmNlbnRvcwA=\"}],\"mtime\":\"2021-04-09T14:30:43.439631Z\"}";
++  //const int tmp_len = 1647;
++  //JSONParser jp;
++  //ldout(cct, 0) << "Processing fixed temp extra data for sample_data.csv" << dendl; 
++  //if (!jp.parse(tmp_str, tmp_len)) {
++  //  ldout(cct, 0) << "failed to parse response extra data. len=" << tmp_len << " data=" << tmp_str << dendl;
++  //  //free(new_json_str);
++  //  return -EIO;
++  //}
++  //JSONDecoder::decode_json("attrs", src_attrs, &jp);
++  //#else
+   if (extra_data_bl.length()) {
+     JSONParser jp;
+-    if (!jp.parse(extra_data_bl.c_str(), extra_data_bl.length())) {
+-      ldout(cct, 0) << "failed to parse response extra data. len=" << extra_data_bl.length() << " data=" << extra_data_bl.c_str() << dendl;
++    string json_string = extra_data_bl.c_str();
++    int json_str_len = extra_data_bl.length();
++    //json_string[json_str_len] = '\0';
++    //char *new_json_str = (char*)malloc(json_str_len+1);
++    //strncpy(new_json_str, json_string, json_str_len);
++    //new_json_str[json_str_len] = '\0';
++    ldout(cct, 0) << "Received extra json string len = "<< json_str_len << ", string = "<< json_string.c_str() << dendl;
++    if (!jp.parse(json_string.c_str(), json_str_len)) {
++    //if (!jp.parse(tmp_str, tmp_len)) {
++      ldout(cct, 0) << "failed to parse response extra data. len=" << json_str_len << " data=" << json_string.c_str() << dendl;
++      //free(new_json_str);
+       return -EIO;
+     }
++    //free(new_json_str);
+     JSONDecoder::decode_json("attrs", src_attrs, &jp);
+   }
++  //#endif
+ 
+   RGWAccessControlPolicy acl;
+   auto aiter = src_attrs.find(RGW_ATTR_ACL);
+diff --git a/src/rgw/rgw_rest.h b/src/rgw/rgw_rest.h
+index ce94984531..ebda142a28 100644
+--- a/src/rgw/rgw_rest.h
++++ b/src/rgw/rgw_rest.h
+@@ -5,6 +5,7 @@
+ 
+ #define TIME_BUF_SIZE 128
+ 
++//#define BOOST_SPIRIT_THREADSAFE
+ #include <boost/utility/string_ref.hpp>
+ #include <boost/container/flat_set.hpp>
+ #include "common/sstring.hh"
+diff --git a/src/rgw/rgw_rest_client.cc b/src/rgw/rgw_rest_client.cc
+index a4fe74672d..7dd0535030 100644
+--- a/src/rgw/rgw_rest_client.cc
++++ b/src/rgw/rgw_rest_client.cc
+@@ -826,7 +826,9 @@ int RGWRESTStreamRWRequest::complete_request(string *etag,
+     }
+     if (psize) {
+       string size_str;
++      
+       set_str_from_headers(out_headers, "RGWX_OBJECT_SIZE", size_str);
++     ldout(cct, 0) << "uur downloaded size " << size_str  << dendl;
+       string err;
+       *psize = strict_strtoll(size_str.c_str(), 10, &err);
+       if (!err.empty()) {
+diff --git a/src/rgw/rgw_rest_s3.h b/src/rgw/rgw_rest_s3.h
+index 8d933d199a..66eafbbff9 100644
+--- a/src/rgw/rgw_rest_s3.h
++++ b/src/rgw/rgw_rest_s3.h
+@@ -4,6 +4,7 @@
+ #pragma once
+ 
+ #define TIME_BUF_SIZE 128
++//#define BOOST_SPIRIT_THREADSAFE
+ 
+ #include <mutex>
+ 
+diff --git a/src/s3select b/src/s3select
+--- a/src/s3select
++++ b/src/s3select
+@@ -1 +1 @@
+-Subproject commit 7ae7a12c138d4607d6c012228c06f3802c493c49
++Subproject commit 7ae7a12c138d4607d6c012228c06f3802c493c49-dirty
+diff --git a/src/vstart.sh b/src/vstart.sh
+index 35a66b77ce..664a079176 100755
+--- a/src/vstart.sh
++++ b/src/vstart.sh
+@@ -521,6 +521,19 @@ get_pci_selector_num() {
+ 
+ do_rgw_conf() {
+ 
++    rgw_datacache_enabled=true
++    backend_url=10.x.y.z:8080
++    aging_interval_in_minutes=2000
++    rgw_cache_size=10000000000 #<cache size in bytes>
++    rgw_datacache_path=/mnt/readcache #<directory for cache objects>
++    rgw_directory_address1=10.x.y.z #<redis instance1 IP address>
++    rgw_directory_address2=10.x.y.z #<redis instance2 IP address>
++    rgw_directory_address3=10.x.y.z #<redis instance3 IP address>
++    rgw_directory_port1=7000
++    rgw_directory_port2=7001
++    rgw_directory_port3=7002
++    cache_threadpool_size=50 #(50-200)
++
+     if [ $CEPH_NUM_RGW -eq 0 ]; then
+         return 0
+     fi
