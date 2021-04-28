@@ -93,7 +93,13 @@ To accomplish our overall goal, we will break it into these subtasks:
 ### Final Implementation details -
 **This section focuses on the final state of the implementation and design after working on the project through the semester.**
 
-#### 1. D4N Caching -
+#### 1. Integrating S3Select with D4N Caching -
+We decided to merge the [S3Select](https://github.com/ceph/s3select) codebase with [D4N](https://github.com/ekaynar/ceph/tree/datacache) codebase. To make sure that this integration was successful, we sent a few S3 Select requests to the RGW of a D4N instance. Then we inspected the log file generate by RGW while processing the request to locate the place of failure. Since D4N, which is implemented on Ceph, has a large codebase, it took us a while to understand the output of RGW. To further understand the flow of a request inside RGW, we ran RGW under GDB, and added a few breakpoints. After inspecting and debugging with GDB for a while, we finally found the places in the code that needs to be modified to properly integrate S3Select into D4N.
+
+A few places where modifications were added are:
+1. It was important to parse the S3 Select query parameters from the client request. Caching code didn't have this functionality, so we added a [`get_params()`](https://github.com/CS6620-S21/D4N-S3Select-Caching/blob/e53a6b0c44664dfa71411db1fb52cd393b65be77/working_s3select_patch.txt#L162) function to the caching logic that fetches the necessary query parameters.
+
+2. One of the biggest challenge for us was to debug RGW for a memory error that caused corruption of an internal library lock. It later turned out to be a missing `#define` in S3Select code due to which compiler emitted two different binary codes to access the same instance of an object. It was tricky to catch and we spent a lot of time on GDB to find the source of the error.
 
 #### 2. Apache Arrow -
 The Apache Arrow integration was aimed at making the S3-Select query parsing more efficient at the client side, as Arrow's standardized data storage format provides significant performace advantage while transferring large amounts of data between systems.
