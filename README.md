@@ -134,11 +134,11 @@ Part 1 - We aim to complete the implementation of S3 Select in the D4N caching c
 1. Merge S3Select pipeline into the Rados gateway (part of D4N).
 2. Make sure that the Rados gateway can accept S3 Select requests and process it using newly merged S3Select pipeline.
 3. Test D4N for the following :
-   a. Can a S3 Select request to D4N generate a backend Ceph request to fetch the uncached object?
-   b. Can D4N cache this recently fetched object through the S3 Select pipeline?
-   c. Can D4N run the S3 Select query on top of an object that was recently brought in?
-   d. Can D4N send the S3 Select query results back to the client?
-   e. Can D4N run S3 Select query on cached objects? The object could have been cached as an outcome of a previous S3 or S3 Select request.
+   1. Can a S3 Select request to D4N generate a backend Ceph request to fetch the uncached object?
+   2. Can D4N cache this recently fetched object through the S3 Select pipeline?
+   3. Can D4N run the S3 Select query on top of an object that was recently brought in?
+   4. Can D4N send the S3 Select query results back to the client?
+   5. Can D4N run S3 Select query on cached objects? The object could have been cached as an outcome of a previous S3 or S3 Select request.
 
 
 Part 2 - We plan to accommodate S3 Select to return the result of queried CSV in an Arrow format. 
